@@ -1,34 +1,60 @@
+"use client"
+
+import React from "react"
+import { useESGStore } from "@/hooks/use-esg-store"
 import { AppSidebar } from "@/components/app-sidebar"
-import { ChartAreaInteractive } from "@/components/chart-area-interactive"
-import { DataTable } from "@/components/data-table"
-import { SectionCards } from "@/components/section-cards"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 
-import data from "./data.json"
+// Modules Tabs
+import { DashboardTab } from "@/components/dashboard-tab"
+import { EnvironmentalTab } from "@/components/environmental-tab"
+import { SocialTab } from "@/components/social-tab"
+import { GovernanceTab } from "@/components/governance-tab"
+import { GamificationTab } from "@/components/gamification-tab"
+import { ReportsTab } from "@/components/reports-tab"
+import { SettingsTab } from "@/components/settings-tab"
 
 export default function Page() {
+  const { currentTab } = useESGStore()
+
+  // Tab router
+  const renderActiveTab = () => {
+    switch (currentTab) {
+      case "Dashboard":
+        return <DashboardTab />
+      case "Environmental":
+        return <EnvironmentalTab />
+      case "Social":
+        return <SocialTab />
+      case "Governance":
+        return <GovernanceTab />
+      case "Gamification":
+        return <GamificationTab />
+      case "Reports":
+        return <ReportsTab />
+      case "Settings":
+        return <SettingsTab />
+      default:
+        return <DashboardTab />
+    }
+  }
+
   return (
     <SidebarProvider
       style={
         {
-          "--sidebar-width": "calc(var(--spacing) * 72)",
-          "--header-height": "calc(var(--spacing) * 12)",
+          "--sidebar-width": "calc(var(--spacing) * 64)",
+          "--header-height": "calc(var(--spacing) * 14)",
         } as React.CSSProperties
       }
     >
       <AppSidebar variant="inset" />
-      <SidebarInset>
+      <SidebarInset className="bg-zinc-50/30 dark:bg-zinc-950/20">
         <SiteHeader />
-        <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              <SectionCards />
-              <div className="px-4 lg:px-6">
-                <ChartAreaInteractive />
-              </div>
-              <DataTable data={data} />
-            </div>
+        <div className="flex flex-1 flex-col overflow-y-auto">
+          <div className="flex-1">
+            {renderActiveTab()}
           </div>
         </div>
       </SidebarInset>

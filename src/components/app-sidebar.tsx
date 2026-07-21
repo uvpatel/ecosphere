@@ -1,10 +1,7 @@
 "use client"
 
 import * as React from "react"
-
-import { NavDocuments } from "@/components/nav-documents"
-import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
+import { useESGStore } from "@/hooks/use-esg-store"
 import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,
@@ -15,189 +12,116 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { LayoutDashboardIcon, ListIcon, ChartBarIcon, FolderIcon, UsersIcon, CameraIcon, FileTextIcon, Settings2Icon, CircleHelpIcon, SearchIcon, DatabaseIcon, FileChartColumnIcon, FileIcon, CommandIcon } from "lucide-react"
+import {
+  LayoutDashboard,
+  Leaf,
+  Heart,
+  ShieldCheck,
+  Trophy,
+  FileBarChart,
+  Settings,
+  Globe
+} from "lucide-react"
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { currentTab, setCurrentTab, currentUser } = useESGStore()
+
+  const menuItems = [
     {
       title: "Dashboard",
-      url: "#",
-      icon: (
-        <LayoutDashboardIcon
-        />
-      ),
+      icon: <LayoutDashboard className="h-4 w-4" />,
+      color: "text-blue-500"
     },
     {
-      title: "Lifecycle",
-      url: "#",
-      icon: (
-        <ListIcon
-        />
-      ),
+      title: "Environmental",
+      icon: <Leaf className="h-4 w-4" />,
+      color: "text-emerald-500"
     },
     {
-      title: "Analytics",
-      url: "#",
-      icon: (
-        <ChartBarIcon
-        />
-      ),
+      title: "Social",
+      icon: <Heart className="h-4 w-4" />,
+      color: "text-rose-500"
     },
     {
-      title: "Projects",
-      url: "#",
-      icon: (
-        <FolderIcon
-        />
-      ),
+      title: "Governance",
+      icon: <ShieldCheck className="h-4 w-4" />,
+      color: "text-amber-500"
     },
     {
-      title: "Team",
-      url: "#",
-      icon: (
-        <UsersIcon
-        />
-      ),
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: (
-        <CameraIcon
-        />
-      ),
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+      title: "Gamification",
+      icon: <Trophy className="h-4 w-4" />,
+      color: "text-indigo-500"
     },
     {
-      title: "Proposal",
-      icon: (
-        <FileTextIcon
-        />
-      ),
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+      title: "Reports",
+      icon: <FileBarChart className="h-4 w-4" />,
+      color: "text-cyan-500"
     },
-    {
-      title: "Prompts",
-      icon: (
-        <FileTextIcon
-        />
-      ),
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
     {
       title: "Settings",
-      url: "#",
-      icon: (
-        <Settings2Icon
-        />
-      ),
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: (
-        <CircleHelpIcon
-        />
-      ),
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: (
-        <SearchIcon
-        />
-      ),
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: (
-        <DatabaseIcon
-        />
-      ),
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: (
-        <FileChartColumnIcon
-        />
-      ),
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: (
-        <FileIcon
-        />
-      ),
-    },
-  ],
-}
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+      icon: <Settings className="h-4 w-4" />,
+      color: "text-zinc-500"
+    }
+  ]
+
+  const userForSidebar = {
+    name: currentUser.name,
+    email: currentUser.email,
+    avatar: currentUser.role === "Admin" ? "/avatars/admin.png" : "/avatars/employee.png"
+  }
+
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader>
+    <Sidebar collapsible="offcanvas" {...props} className="border-r border-zinc-200 dark:border-zinc-800">
+      <SidebarHeader className="border-b border-zinc-100 p-4 dark:border-zinc-800/50">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              className="data-[slot=sidebar-menu-button]:p-1.5!"
-              render={<a href="#" />}
-            >
-              <CommandIcon className="size-5!" />
-              <span className="text-base font-semibold">Acme Inc.</span>
-            </SidebarMenuButton>
+            <div className="flex items-center gap-2 px-1">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-md shadow-emerald-600/20">
+                <Globe className="h-4 w-4" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-bold tracking-tight text-zinc-950 dark:text-zinc-50">
+                  EcoSphere ERP
+                </span>
+                <span className="text-[10px] text-zinc-500 dark:text-zinc-400">
+                  ESG Compliance Engine
+                </span>
+              </div>
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+
+      <SidebarContent className="p-2">
+        <div className="px-3 py-2 text-[10px] font-semibold tracking-wider text-zinc-400 dark:text-zinc-500 uppercase">
+          ESG MODULES
+        </div>
+        <SidebarMenu className="space-y-1">
+          {menuItems.map((item) => {
+            const isActive = currentTab === item.title
+            return (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  onClick={() => setCurrentTab(item.title)}
+                  className={`w-full justify-start gap-3 rounded-lg px-3 py-2 transition-all ${
+                    isActive
+                      ? "bg-zinc-100 text-zinc-900 font-medium dark:bg-zinc-900 dark:text-zinc-50"
+                      : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900/50 dark:hover:text-zinc-50"
+                  }`}
+                >
+                  <span className={`${isActive ? item.color : "text-zinc-400 dark:text-zinc-500"}`}>
+                    {item.icon}
+                  </span>
+                  <span className="text-sm">{item.title}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )
+          })}
+        </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
+
+      <SidebarFooter className="border-t border-zinc-100 p-2 dark:border-zinc-800/50">
+        <NavUser user={userForSidebar} />
       </SidebarFooter>
     </Sidebar>
   )
