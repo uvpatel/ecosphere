@@ -1,14 +1,12 @@
 "use client"
 
-import { redirect } from "next/navigation"
+import WavyBackgroundDemo from '@/components/wavy-background-demo'
+import React from 'react'
 
-export default function Home() {
-  return
-  <>
-    <h1 className="text-xl font-bold">
-      EcoSphere ERP
-    </h1>
-    <p></p>
-  </>
-
+export default function HomePage() {
+  return (
+    <div>
+      <WavyBackgroundDemo />
+    </div>
+  )
 }

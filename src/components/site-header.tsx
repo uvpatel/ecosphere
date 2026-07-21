@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useESGStore } from "@/hooks/use-esg-store"
 import { Bell, Award, Coins, Check, Trash2 } from "lucide-react"
+import { UserButton } from "@clerk/nextjs"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -142,6 +143,11 @@ export function SiteHeader() {
               </option>
             ))}
           </select>
+        </div>
+
+        {/* Clerk User Button */}
+        <div className="flex items-center shrink-0">
+          <UserButton />
         </div>
       </div>
     </header>

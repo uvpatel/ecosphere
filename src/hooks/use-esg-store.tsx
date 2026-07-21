@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react"
 import { toast } from "sonner"
+import { useAuth, useUser } from "@clerk/nextjs"
 
 // --- Types & Interfaces ---
 
@@ -234,6 +235,10 @@ interface ESGStoreContextType {
   currentUser: SimulatedUser
   currentTab: string
   setCurrentTab: (tab: string) => void
+  isAuthenticated: boolean
+  login: (userId: string) => boolean
+  logout: () => void
+  registerUser: (name: string, email: string, departmentId: string) => void
   
   // Actions
   setCurrentUserById: (id: string) => void
@@ -407,6 +412,45 @@ export const ESGProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [simulatedUsers, setSimulatedUsers] = useState<SimulatedUser[]>(initialSimulatedUsers)
   const [currentUser, setCurrentUser] = useState<SimulatedUser>(initialSimulatedUsers[1]) // Alex Rivera default
   const [currentTab, setCurrentTab] = useState<string>("Dashboard")
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
+
+  const { isSignedIn, isLoaded, signOut } = useAuth()
+  const { user } = useUser()
+
+  // Sync Clerk auth state and user information with simulated profiles
+  useEffect(() => {
+    if (isLoaded) {
+      setIsAuthenticated(isSignedIn ?? false)
+      if (isSignedIn && user) {
+        const email = user.emailAddresses[0]?.emailAddress
+        if (email) {
+          const found = simulatedUsers.find(u => u.email.toLowerCase() === email.toLowerCase())
+          if (found) {
+            if (currentUser.id !== found.id) {
+              setCurrentUser(found)
+            }
+          } else {
+            // Automatically register a simulated user entry for the logged-in Clerk user
+            const newUser: SimulatedUser = {
+              id: `emp-${user.id}`,
+              name: user.fullName || user.firstName || "Eco User",
+              email: email,
+              role: "Employee",
+              departmentId: "dept-eng",
+              xp: 0,
+              points: 0,
+              badges: []
+            }
+            setSimulatedUsers(prev => {
+              if (prev.some(u => u.email.toLowerCase() === email.toLowerCase())) return prev
+              return [...prev, newUser]
+            })
+            setCurrentUser(newUser)
+          }
+        }
+      }
+    }
+  }, [isLoaded, isSignedIn, user, simulatedUsers])
 
   // Load from localstorage if present
   useEffect(() => {
@@ -439,6 +483,8 @@ export const ESGProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const active = parsed.simulatedUsers.find((u: SimulatedUser) => u.id === currentUserId)
             if (active) setCurrentUser(active)
           }
+          const auth = localStorage.getItem("ecosphere_auth") === "true"
+          setIsAuthenticated(auth)
         } catch (e) {
           console.error("Failed to load ESG state from localstorage:", e)
         }
@@ -472,14 +518,61 @@ export const ESGProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       localStorage.setItem("ecosphere_esg_data", JSON.stringify(dataToSave))
       localStorage.setItem("ecosphere_active_user", currentUser.id)
+      localStorage.setItem("ecosphere_auth", isAuthenticated ? "true" : "false")
     }
   }, [
     departments, categories, emissionFactors, products, goals, policies, badges, rewards,
     carbonTransactions, csrActivities, employeeParticipations, challenges, challengeParticipations,
-    policyAcknowledgements, audits, complianceIssues, notifications, settings, simulatedUsers, currentUser
+    policyAcknowledgements, audits, complianceIssues, notifications, settings, simulatedUsers, currentUser, isAuthenticated
   ])
 
   // --- Functions / Actions ---
+
+  const login = (userId: string): boolean => {
+    const user = simulatedUsers.find(u => u.id === userId)
+    if (user) {
+      setCurrentUser(user)
+      setIsAuthenticated(true)
+      localStorage.setItem("ecosphere_auth", "true")
+      localStorage.setItem("ecosphere_active_user", userId)
+      toast.success(`Welcome back, ${user.name}!`)
+      return true
+    }
+    return false
+  }
+
+  const logout = () => {
+    signOut()
+    setIsAuthenticated(false)
+    localStorage.setItem("ecosphere_auth", "false")
+    toast.info("Logged out successfully")
+  }
+
+  const registerUser = (name: string, email: string, departmentId: string) => {
+    const existing = simulatedUsers.find(u => u.email.toLowerCase() === email.toLowerCase())
+    if (existing) {
+      toast.error("An account with this email already exists")
+      return
+    }
+
+    const newUser: SimulatedUser = {
+      id: `emp-${Date.now()}`,
+      name,
+      email,
+      role: "Employee",
+      departmentId,
+      xp: 0,
+      points: 0,
+      badges: []
+    }
+
+    setSimulatedUsers(prev => [...prev, newUser])
+    setCurrentUser(newUser)
+    setIsAuthenticated(true)
+    localStorage.setItem("ecosphere_auth", "true")
+    localStorage.setItem("ecosphere_active_user", newUser.id)
+    toast.success(`Account created! Welcome to EcoSphere, ${name}!`)
+  }
 
   const setCurrentUserById = (id: string) => {
     const user = simulatedUsers.find(u => u.id === id)
@@ -982,6 +1075,10 @@ export const ESGProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currentUser,
       currentTab,
       setCurrentTab,
+      isAuthenticated,
+      login,
+      logout,
+      registerUser,
       
       setCurrentUserById,
       updateSettings,

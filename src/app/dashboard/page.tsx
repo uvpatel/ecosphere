@@ -1,7 +1,8 @@
 "use client"
 
-import React from "react"
+import React, { useEffect } from "react"
 import { useESGStore } from "@/hooks/use-esg-store"
+import { useRouter } from "next/navigation"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
@@ -16,7 +17,22 @@ import { ReportsTab } from "@/components/reports-tab"
 import { SettingsTab } from "@/components/settings-tab"
 
 export default function Page() {
-  const { currentTab } = useESGStore()
+  const { currentTab, isAuthenticated } = useESGStore()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/")
+    }
+  }, [isAuthenticated, router])
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-zinc-950 text-zinc-400">
+        Securing session, redirecting...
+      </div>
+    )
+  }
 
   // Tab router
   const renderActiveTab = () => {
